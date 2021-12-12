@@ -1,60 +1,148 @@
 <template>
   <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-router" target="_blank" rel="noopener">router</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-vuex" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
+    <div v-if="componentList.length > 0">
+      <div
+        v-html="componentItem"
+        v-for="(componentItem, index) in componentList"
+        :key="index"
+        @dblclick="removeComponentFromPage(index)"
+      ></div>
+    </div>
+    <div v-if="componentList.length == 0">{{ emptyPageMessage }}</div>
+    <transition name="pop_up_window">
+      <div class="pop-up" v-if="showPopUp === true">
+        <input type="text" v-model="enteredText" placeholder="what do you need" autofocus />
+        <p class="clear-input" @click="clearInput" v-if="enteredText.length !== 0">clear ✖</p>
+      </div>
+    </transition>
+    <br />
   </div>
 </template>
 
 <script>
 export default {
-  name: 'HelloWorld',
+  name: 'helloWorld',
   props: {
     msg: String
+  },
+  data() {
+    return {
+      emptyPageMessage: 'Nothing added',
+      showPopUp: false,
+      enteredText: "",
+      options: {
+        paragraph: { listeningPhrase: 'p:', text: 'paragraph' },
+        title: { listeningPhrase: 't:', text: 'title' }
+      }
+    }
+  },
+  computed: {
+    componentList() {
+      return this.$store.getters['GET_COMPONENT_LIST']
+    }
+  },
+  watch: {
+    enteredText(newEnteredText) {
+      if (newEnteredText == this.options.paragraph.listeningPhrase) {
+        this.enteredText = this.options.paragraph.text
+      }
+
+      if (newEnteredText == this.options.title.listeningPhrase) {
+        this.enteredText = this.options.title.text
+      }
+    }
+  },
+  created() {
+    window.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.key == "/") {
+        this.showPopUp = !this.showPopUp
+        this.enteredText = ""
+      }
+
+      if (e.key == 'Escape') {
+        this.enteredText = ""
+      }
+
+      if (e.key == 'Enter') {
+        if (this.enteredText == this.options.title.text) {
+          var titleText = 'A Brand New Title'
+          this.$store.commit('ADD_COMPONENT', { type: this.options.title.text, text: titleText })
+          this.enteredText = ""
+        }
+
+        if (this.enteredText == this.options.paragraph.text) {
+          var paragraphText = 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Praesentium itaque quae earum molestiae dolor facilis nam, illo laboriosam debitis autem vitae assumenda alias dicta provident aspernatur expedita dolorem nemo ex maiores similique impedit ducimus! Natus culpa corporis provident doloribus quae non soluta distinctio enim voluptatum ipsam! Voluptas tempore optio natus?'
+
+          this.$store.commit('ADD_COMPONENT', { type: this.options.paragraph.text, text: paragraphText })
+          this.enteredText = ""
+        }
+      }
+    });
+  },
+  methods: {
+    clearInput() {
+      this.enteredText = ""
+    },
+    removeComponentFromPage(ind) {
+      // alert(`trying to remove ${this.componentList[ind]}`)
+      this.$store.commit('REMOVE_COMPONENT', { index: ind })
+    }
   }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h3 {
-  margin: 40px 0 0;
+.pop_up_window-enter-from,
+.pop_up_window-leave-to {
+  /* opacity: 0; */
+  transform: scale(0);
 }
-ul {
-  list-style-type: none;
-  padding: 0;
+.pop_up_window-enter-active,
+.pop_up_window-leave-active {
+  transition: all 0.1s ease-in-out;
 }
-li {
-  display: inline-block;
-  margin: 0 10px;
+.hello {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  text-align: left;
 }
-a {
-  color: #42b983;
+
+.pop-up {
+  width: 50%;
+  height: 40px;
+  border-radius: 10px;
+  margin-top: 20px;
+  margin-bottom: 50px;
+  border: 1px solid red;
+  border-left: 5px solid red;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  background-color: whitesmoke;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+
+input {
+  width: 80%;
+  height: 35px;
+
+  padding: 0 10px;
+  border-radius: 10px;
+  font-size: 20px;
+  border: none;
+  outline: none;
+  background-color: whitesmoke;
+}
+
+.clear-input {
+  margin-right: 10px;
+  padding: 5px 0;
+  font-weight: bold;
+  cursor: pointer;
 }
 </style>

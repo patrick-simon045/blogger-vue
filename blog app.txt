@@ -1,0 +1,24 @@
+blog app
+    # features
+        - medium-like interface
+        - listeing to '/' key stroke to trigger pop up menu
+            - https://stackoverflow.com/questions/50395674/handle-key-press-by-function-in-vuejs
+                Vue.component('modal', {
+                    template: '<div>test modal</div>',
+                    });
+
+                    new Vue({
+                    el: "#app",
+                    created() {
+                        window.addEventListener('keydown', (e) => {
+                        if (e.key == 'Escape') {
+                            this.showModal = !this.showModal;
+                        }
+                        });
+                    },
+                    data: {
+                        showModal: true
+                    }
+                })
+        - upon choosing an option in the menu item, populate it in a vue component
+            
