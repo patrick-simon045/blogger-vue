@@ -2,6 +2,7 @@
   <div class="hello">
     <div v-if="componentList.length > 0">
       <div
+      class="v-html"
         v-html="componentItem"
         v-for="(componentItem, index) in componentList"
         :key="index"
@@ -103,12 +104,16 @@ export default {
   transition: all 0.1s ease-in-out;
 }
 .hello {
-  width: 50%;
+  width: 60%;
+  margin: 50px 0;
+  padding: 10px 20px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
   text-align: left;
+  background-color: whitesmoke;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
 }
 
 .pop-up {
